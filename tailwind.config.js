@@ -10,14 +10,15 @@ module.exports = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
+        background: '#f9f8f1',
         foreground: "hsl(var(--foreground))",
+        text: '#111007',
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: '#d6d3a2',
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
+          DEFAULT: '#b6e4b6',
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
@@ -29,7 +30,7 @@ module.exports = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
+          DEFAULT: '#3c704e',
           foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
@@ -45,6 +46,9 @@ module.exports = {
         lg: `var(--radius)`,
         md: `calc(var(--radius) - 2px)`,
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        prociono: ['Prociono', 'serif'],
       },
       fontSize: {
         base: '1rem', // 16px

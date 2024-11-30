@@ -61,46 +61,101 @@ function Signup() {
   };
 
   return (
-    <div>
+    <div className="max-w-md mx-auto bg-primary p-6 rounded-lg shadow">
       {step === 'signup' && (
-        <form onSubmit={handleSignup}>
-          <input 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-            placeholder="Email" 
-            type="email" 
-            required 
-          />
-          <input 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-            placeholder="Password" 
-            type="password" 
-            required 
-          />
-          <button type="submit">Sign Up</button>
-        </form>
+        <>
+          <h2 className="text-2xl font-semibold text-center text-accent mb-4">Sign Up</h2>
+          <form onSubmit={handleSignup} className="space-y-4">
+            <div>
+              <label className="block text-textColor font-medium mb-1" htmlFor="signup-email">
+                Email
+              </label>
+              <input
+                id="signup-email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                type="email"
+                required
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+            <div>
+              <label className="block text-textColor font-medium mb-1" htmlFor="signup-password">
+                Password
+              </label>
+              <input
+                id="signup-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a password"
+                type="password"
+                required
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-accent text-white py-2 px-4 rounded hover:bg-accent-dark"
+            >
+              Sign Up
+            </button>
+          </form>
+        </>
       )}
 
       {step === 'confirm' && (
-        <form onSubmit={handleConfirm}>
-          <input 
-            value={confirmationCode} 
-            onChange={(e) => setConfirmationCode(e.target.value)} 
-            placeholder="Confirmation Code" 
-            type="text" 
-            required 
-          />
-          <button type="submit">Confirm Email</button>
-        </form>
+        <>
+          <h2 className="text-2xl font-semibold text-center text-accent mb-4">Confirm Your Email</h2>
+          <p className="text-textColor mb-4">
+            A confirmation code has been sent to your email. Please enter it below to confirm your account.
+          </p>
+          <form onSubmit={handleConfirm} className="space-y-4">
+            <div>
+              <label className="block text-textColor font-medium mb-1" htmlFor="confirmation-code">
+                Confirmation Code
+              </label>
+              <input
+                id="confirmation-code"
+                value={confirmationCode}
+                onChange={(e) => setConfirmationCode(e.target.value)}
+                placeholder="Enter confirmation code"
+                type="text"
+                required
+                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-accent text-white py-2 px-4 rounded hover:bg-accent-dark"
+            >
+              Confirm Email
+            </button>
+          </form>
+        </>
       )}
 
       {step === 'confirmed' && (
-        <p style={{ color: 'green' }}>Email confirmed successfully! You can now log in.</p>
+        <div className="text-center">
+          <p className="text-green-600 font-semibold">
+            Email confirmed successfully! You can now log in.
+          </p>
+        </div>
       )}
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && step === 'signup' && <p style={{ color: 'green' }}>Sign up successful! Please check your email for a confirmation code.</p>}
+      {error && (
+        <div className="mt-4">
+          <p className="text-red-600">{error}</p>
+        </div>
+      )}
+
+      {success && step === 'signup' && (
+        <div className="mt-4">
+          <p className="text-green-600">
+            Sign up successful! Please check your email for a confirmation code.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

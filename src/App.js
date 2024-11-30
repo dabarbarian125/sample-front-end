@@ -7,7 +7,7 @@ import {jwtDecode} from 'jwt-decode';
 
 function App() {
   const [authTokens, setAuthTokens] = useState(null);
-  const [messages, setMessages] = useState([]); // State to hold received messages
+  const [messages, setMessages] = useState([]);
 
   const socketRef = useRef(null);
 
@@ -22,7 +22,7 @@ function App() {
 
       socketRef.current.onmessage = (event) => {
         console.log(`Received from server: ${event.data}`);
-        setMessages((prevMessages) => [...prevMessages, event.data]); // Update messages state
+        setMessages((prevMessages) => [...prevMessages, event.data]);
       };
 
       socketRef.current.onerror = (error) => {
@@ -33,7 +33,6 @@ function App() {
         console.log('WebSocket connection closed');
       };
 
-      // Clean up on unmount or when authTokens changes
       return () => {
         if (socketRef.current) {
           socketRef.current.close();
@@ -46,7 +45,7 @@ function App() {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       const message = 'Client message at ' + new Date().toLocaleTimeString();
       socketRef.current.send(message);
-      setMessages((prevMessages) => [...prevMessages, `You: ${message}`]); // Optional: Add sent message to messages state
+      setMessages((prevMessages) => [...prevMessages, `You: ${message}`]);
     } else {
       console.error('WebSocket is not open');
     }
@@ -58,30 +57,43 @@ function App() {
   };
 
   const decodedToken = authTokens ? jwtDecode(authTokens) : null;
-  console.log('Decoded token:', decodedToken);
 
   return (
-    <div>
+    <div className="min-h-screen flex items-center justify-center bg-background">
       {!authTokens ? (
-        <>
-          <h2>Sign Up</h2>
+        <div className="space-y-8">
           <Signup />
-          <h2>Log In</h2>
           <Login setAuthTokens={setAuthTokens} />
-        </>
+        </div>
       ) : (
-        <div>
-          <h1>Welcome, {decodedToken.email}</h1>
-          <button onClick={handleLogout}>Log Out</button>
-          <h2>WebSocket Test</h2>
-          <button onClick={sendMessage}>Send Message to Server</button>
-
-          <h3>Messages:</h3>
-          <ul>
-            {messages.map((msg, index) => (
-              <li key={index}>{msg}</li>
-            ))}
-          </ul>
+        <div className="max-w-lg w-full p-6 bg-secondary rounded-lg shadow">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold text-accent">Welcome, {decodedToken.email}</h1>
+            <button
+              onClick={handleLogout}
+              className="text-text bg-primary hover:bg-primary-dark px-4 py-2 rounded"
+            >
+              Log Out
+            </button>
+          </div>
+          <div className="space-y-4">
+            <button
+              onClick={sendMessage}
+              className="w-full bg-accent text-white py-2 px-4 rounded hover:bg-accent-dark"
+            >
+              Send Message to Server
+            </button>
+            <div>
+              <h2 className="text-xl font-semibold text-accent">Messages:</h2>
+              <ul className="mt-2 space-y-2">
+                {messages.map((msg, index) => (
+                  <li key={index} className="p-2 bg-white rounded shadow">
+                    {msg}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
     </div>
