@@ -50,10 +50,8 @@
     --ring: 216 34% 17%;
   }
 
-  * {
-    @apply border-border;
-  }
+
   body {
-  @apply font-prociono bg-background text-text;
+  @apply font-prociono bg-background text-textColor;
   }
 }

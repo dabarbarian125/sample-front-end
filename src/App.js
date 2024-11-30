@@ -8,6 +8,7 @@ import {jwtDecode} from 'jwt-decode';
 function App() {
   const [authTokens, setAuthTokens] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [showSignup, setShowSignup] = useState(false); // State to toggle between login and signup
 
   const socketRef = useRef(null);
 
@@ -33,6 +34,7 @@ function App() {
         console.log('WebSocket connection closed');
       };
 
+      // Clean up on unmount or when authTokens changes
       return () => {
         if (socketRef.current) {
           socketRef.current.close();
@@ -62,16 +64,43 @@ function App() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       {!authTokens ? (
         <div className="space-y-8">
-          <Signup />
-          <Login setAuthTokens={setAuthTokens} />
+          {!showSignup ? (
+            <div>
+              <Login setAuthTokens={setAuthTokens} />
+              <p className="mt-4 text-center text-textColor">
+                Don't have an account?{' '}
+                <button
+                  onClick={() => setShowSignup(true)}
+                  className="text-accent hover:underline"
+                >
+                  Sign up!
+                </button>
+              </p>
+            </div>
+          ) : (
+            <div>
+              <Signup />
+              <p className="mt-4 text-center text-textColor">
+                Already have an account?{' '}
+                <button
+                  onClick={() => setShowSignup(false)}
+                  className="text-accent hover:underline"
+                >
+                  Log in!
+                </button>
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="max-w-lg w-full p-6 bg-secondary rounded-lg shadow">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-accent">Welcome, {decodedToken.email}</h1>
+            <h1 className="text-2xl font-bold text-accent">
+              Welcome, {decodedToken.email}
+            </h1>
             <button
               onClick={handleLogout}
-              className="text-text bg-primary hover:bg-primary-dark px-4 py-2 rounded"
+              className="text-textColor bg-primary hover:bg-primary-dark px-4 py-2 rounded"
             >
               Log Out
             </button>
