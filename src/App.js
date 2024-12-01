@@ -8,7 +8,10 @@ import {jwtDecode} from 'jwt-decode';
 function App() {
   const [authTokens, setAuthTokens] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [showSignup, setShowSignup] = useState(false); // State to toggle between login and signup
+  const [showSignup, setShowSignup] = useState(false);
+  const [usersData, setUsersData] = useState(null); // State to store fetched users data
+  const [loading, setLoading] = useState(false); // State for loading indicator
+  const [error, setError] = useState(null); // State for error handling
 
   const socketRef = useRef(null);
 
@@ -60,6 +63,35 @@ function App() {
 
   const decodedToken = authTokens ? jwtDecode(authTokens) : null;
 
+  // Function to fetch users data from the API
+  const fetchUsersData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('http://localhost:3001/api/users', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Include the auth token if required by the API
+          Authorization: `Bearer ${authTokens}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setUsersData(data);
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError(err.message || 'An error occurred while fetching users data.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       {!authTokens ? (
@@ -93,8 +125,8 @@ function App() {
           )}
         </div>
       ) : (
-        <div className="max-w-lg w-full p-6 bg-secondary rounded-lg shadow">
-          <div className="flex items-center justify-between mb-6">
+        <div className="max-w-lg w-full p-6 bg-secondary rounded-lg shadow space-y-6">
+          <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-accent">
               Welcome, {decodedToken.email}
             </h1>
@@ -105,6 +137,8 @@ function App() {
               Log Out
             </button>
           </div>
+
+          {/* Existing WebSocket interaction */}
           <div className="space-y-4">
             <button
               onClick={sendMessage}
@@ -122,6 +156,35 @@ function App() {
                 ))}
               </ul>
             </div>
+          </div>
+
+          {/* New section for fetching and displaying users data */}
+          <div className="space-y-4">
+            <button
+              onClick={fetchUsersData}
+              className="w-full bg-accent text-white py-2 px-4 rounded hover:bg-accent-dark"
+            >
+              Fetch Users Data
+            </button>
+
+            {loading && (
+              <p className="text-center text-textColor">Loading...</p>
+            )}
+
+            {error && (
+              <p className="text-center text-red-600">{error}</p>
+            )}
+
+            {usersData && (
+              <div>
+                <h2 className="text-xl font-semibold text-accent">
+                  Users Data:
+                </h2>
+                <pre className="mt-2 p-4 bg-white rounded shadow overflow-x-auto">
+                  {JSON.stringify(usersData, null, 2)}
+                </pre>
+              </div>
+            )}
           </div>
         </div>
       )}
