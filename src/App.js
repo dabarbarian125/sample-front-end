@@ -1,17 +1,19 @@
-// src/App.js
-
 import React, { useState, useEffect, useRef } from 'react';
-import Signup from './Signup';
-import Login from './Login';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode';
+import Sidebar from './components/Sidebar';
+import Login from './Login';
+import Signup from './Signup';
+import APIDocs from './pages/APIDocs';
+import About from './pages/About';
 
 function App() {
   const [authTokens, setAuthTokens] = useState(null);
   const [messages, setMessages] = useState([]);
   const [showSignup, setShowSignup] = useState(false);
-  const [usersData, setUsersData] = useState(null); // State to store fetched users data
-  const [loading, setLoading] = useState(false); // State for loading indicator
-  const [error, setError] = useState(null); // State for error handling
+  const [usersData, setUsersData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const socketRef = useRef(null);
 
@@ -46,24 +48,9 @@ function App() {
     }
   }, [authTokens]);
 
-  const sendMessage = () => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      const message = 'Client message at ' + new Date().toLocaleTimeString();
-      socketRef.current.send(message);
-      setMessages((prevMessages) => [...prevMessages, `You: ${message}`]);
-    } else {
-      console.error('WebSocket is not open');
-    }
-  };
-
-  const handleLogout = () => {
-    setAuthTokens(null);
-    console.log('User logged out');
-  };
-
   const decodedToken = authTokens ? jwtDecode(authTokens) : null;
 
-  // Function to fetch users data from the API
+  // Function to fetch users data
   const fetchUsersData = async () => {
     setLoading(true);
     setError(null);
@@ -73,7 +60,6 @@ function App() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          // Include the auth token if required by the API
           Authorization: `Bearer ${authTokens}`,
         },
       });
@@ -92,103 +78,132 @@ function App() {
     }
   };
 
+  // Protected route wrapper
+  const ProtectedRoute = ({ children }) => {
+    return authTokens ? children : <Navigate to="/login" />;
+  };
+
+  // Login page with navigation on successful login
+  const LoginPage = () => {
+    const navigate = useNavigate();
+
+    const handleSetAuthTokens = (tokens) => {
+      setAuthTokens(tokens);
+      navigate('/'); // Redirect to the protected route
+    };
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        {!showSignup ? (
+          <div>
+            <Login setAuthTokens={handleSetAuthTokens} />
+            <p className="mt-4 text-center text-textColor">
+              Don't have an account?{' '}
+              <button
+                onClick={() => setShowSignup(true)}
+                className="text-accent hover:underline"
+              >
+                Sign up!
+              </button>
+            </p>
+          </div>
+        ) : (
+          <div>
+            <Signup />
+            <p className="mt-4 text-center text-textColor">
+              Already have an account?{' '}
+              <button
+                onClick={() => setShowSignup(false)}
+                className="text-accent hover:underline"
+              >
+                Log in!
+              </button>
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      {!authTokens ? (
-        <div className="space-y-8">
-          {!showSignup ? (
-            <div>
-              <Login setAuthTokens={setAuthTokens} />
-              <p className="mt-4 text-center text-textColor">
-                Don't have an account?{' '}
-                <button
-                  onClick={() => setShowSignup(true)}
-                  className="text-accent hover:underline"
-                >
-                  Sign up!
-                </button>
-              </p>
-            </div>
-          ) : (
-            <div>
-              <Signup />
-              <p className="mt-4 text-center text-textColor">
-                Already have an account?{' '}
-                <button
-                  onClick={() => setShowSignup(false)}
-                  className="text-accent hover:underline"
-                >
-                  Log in!
-                </button>
-              </p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="max-w-lg w-full p-6 bg-secondary rounded-lg shadow space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-accent">
-              Welcome, {decodedToken.email}
-            </h1>
-            <button
-              onClick={handleLogout}
-              className="text-textColor bg-primary hover:bg-primary-dark px-4 py-2 rounded"
-            >
-              Log Out
-            </button>
-          </div>
+    <Router>
+      <div className="flex">
+        {authTokens && <Sidebar />}
+        <main className={authTokens ? 'ml-72 w-full' : 'w-full'}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <div className="max-w-lg w-full p-6 bg-secondary rounded-lg shadow space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h1 className="text-2xl font-bold text-accent">
+                        Welcome, {decodedToken?.email}
+                      </h1>
+                      <button
+                        onClick={() => setAuthTokens(null)}
+                        className="text-textColor bg-primary hover:bg-primary-dark px-4 py-2 rounded"
+                      >
+                        Log Out
+                      </button>
+                    </div>
 
-          {/* Existing WebSocket interaction */}
-          <div className="space-y-4">
-            <button
-              onClick={sendMessage}
-              className="w-full bg-accent text-white py-2 px-4 rounded hover:bg-accent-dark"
-            >
-              Send Message to Server
-            </button>
-            <div>
-              <h2 className="text-xl font-semibold text-accent">Messages:</h2>
-              <ul className="mt-2 space-y-2">
-                {messages.map((msg, index) => (
-                  <li key={index} className="p-2 bg-white rounded shadow">
-                    {msg}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+                    <div className="space-y-4">
+                      <button
+                        onClick={() => {
+                          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+                            const message = 'Client message at ' + new Date().toLocaleTimeString();
+                            socketRef.current.send(message);
+                            setMessages((prevMessages) => [...prevMessages, `You: ${message}`]);
+                          } else {
+                            console.error('WebSocket is not open');
+                          }
+                        }}
+                        className="w-full bg-accent text-white py-2 px-4 rounded hover:bg-accent-dark"
+                      >
+                        Send Message to Server
+                      </button>
+                      <div>
+                        <h2 className="text-xl font-semibold text-accent">Messages:</h2>
+                        <ul className="mt-2 space-y-2">
+                          {messages.map((msg, index) => (
+                            <li key={index} className="p-2 bg-white rounded shadow">
+                              {msg}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
 
-          {/* New section for fetching and displaying users data */}
-          <div className="space-y-4">
-            <button
-              onClick={fetchUsersData}
-              className="w-full bg-accent text-white py-2 px-4 rounded hover:bg-accent-dark"
-            >
-              Fetch Users Data
-            </button>
-
-            {loading && (
-              <p className="text-center text-textColor">Loading...</p>
-            )}
-
-            {error && (
-              <p className="text-center text-red-600">{error}</p>
-            )}
-
-            {usersData && (
-              <div>
-                <h2 className="text-xl font-semibold text-accent">
-                  Users Data:
-                </h2>
-                <pre className="mt-2 p-4 bg-white rounded shadow overflow-x-auto">
-                  {JSON.stringify(usersData, null, 2)}
-                </pre>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+                    <div className="space-y-4">
+                      <button
+                        onClick={fetchUsersData}
+                        className="w-full bg-accent text-white py-2 px-4 rounded hover:bg-accent-dark"
+                      >
+                        Fetch Users Data
+                      </button>
+                      {loading && <p className="text-center text-textColor">Loading...</p>}
+                      {error && <p className="text-center text-red-600">{error}</p>}
+                      {usersData && (
+                        <div>
+                          <h2 className="text-xl font-semibold text-accent">Users Data:</h2>
+                          <pre className="mt-2 p-4 bg-white rounded shadow overflow-x-auto">
+                            {JSON.stringify(usersData, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/api-docs" element={<ProtectedRoute><APIDocs /></ProtectedRoute>} />
+            <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   );
 }
 
