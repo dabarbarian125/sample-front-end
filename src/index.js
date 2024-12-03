@@ -7,9 +7,9 @@ import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from "react-oidc-context";
 
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_O7UYxcY5z",
-  client_id: "l0kdshe52srutbpuvlmi3qqom",
-  redirect_uri: "http://localhost:3000/",
+  authority: process.env.REACT_APP_COGNITO_AUTHORITY_URL,
+  client_id: process.env.REACT_APP_COGNITO_CLIENT_ID,
+  redirect_uri: process.env.REACT_APP_MY_IP,
   response_type: "code",
   scope: "email openid profile",
 };

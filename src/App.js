@@ -19,7 +19,7 @@ function App() {
 
   useEffect(() => {
     if (authTokens) {
-      socketRef.current = new WebSocket('ws://localhost:3001');
+      socketRef.current = new WebSocket(process.env.REACT_APP_WEBSOCKET_URL);
 
       socketRef.current.onopen = () => {
         console.log('WebSocket connected');
@@ -56,7 +56,7 @@ function App() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/users', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/users`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
